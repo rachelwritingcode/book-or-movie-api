@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/jeremywohl/flatten v1.0.1
+	github.com/joho/godotenv v1.4.0
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/echo/v4 v4.7.2
 )

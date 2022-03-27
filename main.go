@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -12,6 +13,28 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
+type Movie struct {
+	Title string `json:title`
+}
+
+type BookResponse struct {
+	Title  string `json:title`
+	Rating int    `json:rating`
+	Plot   string `json:plot`
+}
+
+type Book struct {
+	Title string `json:title`
+}
+
+type MovieResponse struct {
+	Title    string   `json:title`
+	Rating   int      `json:rating`
+	Actors   []string `json:actors`
+	Director string   `json:director`
+	Plot     string   `json:plot`
+}
+
 func main() {
 
 	// Web Server
@@ -22,14 +45,31 @@ func main() {
 	e.Use(middleware.Recover())
 
 	// Routes
-	// TODO add functionality for user to pass in a parameter to the route
-	e.GET("/book", getBook)
+	e.GET("/getmovie", getMovie)
+	// e.GET("/getbook", getBook)
+
+	e.GET("/status", func(c echo.Context) error {
+		return c.HTML(
+			http.StatusOK,
+			"<h1>API is running</h1>",
+		)
+	})
+
+	// TODO Provide a Recommendation based on the Ratings
+	// TODO Read the book/movie
 
 	// Start server
 	e.Logger.Fatal(e.Start(":8080"))
 }
 
-func getBook(c echo.Context) error {
+// func getBook(c echo.Context) error {
+// }
+
+func getMovie(c echo.Context) error {
+
+	// Title Request Parameter
+	title := c.QueryParam("title")
+	fmt.Println("Title Query: " + title)
 
 	// Load Environment Variables
 	err := godotenv.Load("local.env")
@@ -38,11 +78,14 @@ func getBook(c echo.Context) error {
 	}
 
 	// Environment Variables
-	nyt_books_api := os.Getenv("NYT_BOOKS_API")
-	nyt_api_key := os.Getenv("NYT_API_KEY")
+	omdb_api := os.Getenv("OMDB_API")
+	omdb_key := os.Getenv("OMDB_KEY")
 
-	// TODO Pass in the request parameter for &api-key&title= title that user selects
-	req, err := http.NewRequest("GET", nyt_books_api, nil)
+	request_url := omdb_api + "=" + omdb_key + "&t=" + title
+
+	fmt.Println("Request URL: " + request_url)
+
+	req, err := http.NewRequest("GET", request_url, nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -60,12 +103,25 @@ func getBook(c echo.Context) error {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	// Parse out Rating
+	// Title
+	// Actors
+	// Director
+	// Plot
+	// Return a custom movie response
+
+	// TODO Retrieve Book Review Information
+
 	responseString := string(b)
 	flat, err := flatten.FlattenString(responseString, "", flatten.DotStyle)
 
 	return c.String(http.StatusOK, flat)
 }
 
-// func getMovieByTitle(c echo.Context) error {
-// 	return c.String(http.StatusOK, "Hello, World!")
-// }
+func getBookReview(title string) string {
+	review := ""
+	// TODO Call the Book Review API
+	// Pass in the title request query parameter
+	return review
+}
