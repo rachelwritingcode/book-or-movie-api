@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/buger/jsonparser"
 	"github.com/jeremywohl/flatten"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
@@ -105,12 +106,28 @@ func getMovie(c echo.Context) error {
 	}
 
 	// Parse out Rating
+	director, _ := jsonparser.GetString(b, "Director")
+	fmt.Println(director)
+
+	plot, _ := jsonparser.GetString(b, "Plot")
+	fmt.Println(plot)
+
+	actors, _ := jsonparser.GetString(b, "Actors")
+	fmt.Println(actors)
+
+	rotten_tomatoes, _ := jsonparser.GetString(b, "Ratings.1.Value")
+	fmt.Println(rotten_tomatoes)
+
+	metacritic, _ := jsonparser.GetString(b, "Ratings.2.Value")
+	fmt.Println(metacritic)
+
+	// TODO Add the data to the custom struct for MovieReview
+
 	// Title
 	// Actors
 	// Director
 	// Plot
 	// Return a custom movie response
-
 	// TODO Retrieve Book Review Information
 
 	responseString := string(b)
