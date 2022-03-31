@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -8,32 +9,29 @@ import (
 	"os"
 
 	"github.com/buger/jsonparser"
-	"github.com/jeremywohl/flatten"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
 
-type Movie struct {
-	Title string `json:title`
-}
+// type BookResponse struct {
+// 	Title  string `json:title`
+// 	Rating int    `json:rating`
+// 	Plot   string `json:plot`
+// }
 
-type BookResponse struct {
-	Title  string `json:title`
-	Rating int    `json:rating`
-	Plot   string `json:plot`
-}
-
-type Book struct {
-	Title string `json:title`
-}
+// type Book struct {
+// 	Title string `json:title`
+// }
 
 type MovieResponse struct {
-	Title    string   `json:title`
-	Rating   int      `json:rating`
-	Actors   []string `json:actors`
-	Director string   `json:director`
-	Plot     string   `json:plot`
+	Title       string `json:title`
+	Rating      string `json:rating`
+	Actors      string `json:actors`
+	Director    string `json:director`
+	Plot        string `json:plot`
+	ReleaseYear string `json:release year`
+	Awards      string `json:awards`
 }
 
 func main() {
@@ -105,40 +103,35 @@ func getMovie(c echo.Context) error {
 		log.Fatalln(err)
 	}
 
+	// TODO Remove after debugging
+	fmt.Println("\n OMDB API RESULTS " + string(b) + "\n")
 	// Parse out Rating
 	director, _ := jsonparser.GetString(b, "Director")
-	fmt.Println(director)
-
 	plot, _ := jsonparser.GetString(b, "Plot")
-	fmt.Println(plot)
-
 	actors, _ := jsonparser.GetString(b, "Actors")
-	fmt.Println(actors)
+	rating, _ := jsonparser.GetString(b, "imdbRating")
+	year, _ := jsonparser.GetString(b, "Year")
+	// TODO Escape special character & for awards field
+	awards, _ := jsonparser.GetString(b, "Awards")
 
-	rotten_tomatoes, _ := jsonparser.GetString(b, "Ratings.1.Value")
-	fmt.Println(rotten_tomatoes)
+	movieResponseData := &MovieResponse{
+		title,
+		rating,
+		actors,
+		director,
+		plot,
+		year,
+		awards}
 
-	metacritic, _ := jsonparser.GetString(b, "Ratings.2.Value")
-	fmt.Println(metacritic)
-
-	// TODO Add the data to the custom struct for MovieReview
-
-	// Title
-	// Actors
-	// Director
-	// Plot
-	// Return a custom movie response
 	// TODO Retrieve Book Review Information
 
-	responseString := string(b)
-	flat, err := flatten.FlattenString(responseString, "", flatten.DotStyle)
+	// Convert struct data to string
+	movieResponse, _ := json.Marshal(movieResponseData)
+	return c.String(http.StatusOK, string(movieResponse))
 
-	return c.String(http.StatusOK, flat)
 }
 
-func getBookReview(title string) string {
-	review := ""
-	// TODO Call the Book Review API
-	// Pass in the title request query parameter
-	return review
-}
+// func getBook(title string) string {
+// TODO Call the Book Review API
+// Pass in the title request query parameter
+// }
