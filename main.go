@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -16,13 +19,13 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
-// type BookResponse struct {
-// 	Title  string `json:title`
-//	Author string `json:author`
-// 	Rating int    `json:rating`
-// 	Plot   string `json:plot`
-//	Year 	string `json:year`
-// }
+type BookResponse struct {
+	Title  string `json:title`
+	Author string `json:author`
+	Rating string `json:rating`
+	Plot   string `json:plot`
+	Year   string `json:year`
+}
 
 type MovieResponse struct {
 	Title       string `json:title`
@@ -130,7 +133,8 @@ func getBook(c echo.Context) error {
 	// Title Request Parameter
 	title := c.QueryParam("title")
 	fmt.Println("Title Query: " + title)
-
+	//TODO if title has two words, then add the ASCII %20 symbol
+	//https://openlibrary.org/search.json?title=the%20red%20scrolls%20of%20magic
 	request_url := "http://openlibrary.org/search.json?title=" + title
 	fmt.Println("Request URL: " + request_url)
 
@@ -153,56 +157,62 @@ func getBook(c echo.Context) error {
 		log.Fatalln(err)
 	}
 
-	// TODO Remove after debugging
+	fmt.Println(string(b))
+
 	open_library_id, _ := jsonparser.GetString(b, "docs", "[0]", "key")
+	fmt.Println("open_library_id : " + open_library_id)
 
-	year, _ := jsonparser.GetString(b, "docs", "[0]", "first_publish_year")
-	fmt.Println("Book Publishing Year: " + year)
-
-	author, _ := jsonparser.GetString(b, "docs", "[0]", "author_name")
-	fmt.Println("Author: " + author)
-
-	// TODO Web Scraping
-	// TODO webscrape overview information for book plot
-	// TODO webscrape the book star ratings
-
-	// Instantiate default collector
+	// Scrape Open Library for rating and plot information
+	rating := ""
+	var plot string = ""
+	var ratings = []string{}
 	web_scraper := colly.NewCollector(
-		// Visit only domain
-		colly.AllowedDomains("openlibrary.org"),
+		colly.AllowedDomains("https://openlibrary.org", "openlibrary.org"),
 	)
 
-	// Limit the number of threads started by colly to two
-	// when visiting links which domains' matches "*httpbin.*" glob
+	web_scraper.OnHTML(".readers-stats ", func(e *colly.HTMLElement) {
+		e.ForEach("li", func(_ int, elem *colly.HTMLElement) {
+			ratings = append(ratings, e.DOM.Find("span").Text())
+		})
+	})
+
+	web_scraper.OnHTML(".book-description-content", func(e *colly.HTMLElement) {
+		e.ForEach("p", func(_ int, elem *colly.HTMLElement) {
+			plot = e.Text
+		})
+	})
+
 	web_scraper.Limit(&colly.LimitRule{
-		DomainGlob:  "*httpbin.*",
-		Parallelism: 1,
-		Delay:       20 * time.Second,
+		DomainGlob:  "*",
+		RandomDelay: 1 * time.Second,
 	})
 
-	// On every a element which has href attribute call callback
-	web_scraper.OnHTML("a[href]", func(e *colly.HTMLElement) {
-		link := e.Attr("href")
-		// Print link
-		fmt.Printf("Link found: %q -> %s\n", e.Text, link)
-		// Visit link found on page
-		// Only those links are visited which are in AllowedDomains
-		web_scraper.Visit(e.Request.AbsoluteURL(link))
+	web_scraper.OnRequest(func(request *colly.Request) {
+		fmt.Println("Visiting...https://openlibrary.org" + open_library_id)
 	})
 
-	// Before making a request print "Visiting ..."
-	web_scraper.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL.String())
-	})
-	//TODO Set web scraping parameters!
+	web_scraper.Visit("https://openlibrary.org" + open_library_id)
 
-	// Start scraping the website
-	web_scraper.Visit("https://openlibrary.org/" + open_library_id)
+	rating = strings.ReplaceAll(ratings[len(ratings)-1], "★", "")
+	rating_float, _ := strconv.ParseFloat(rating, 64)
+	rating_float = math.Ceil(rating_float*100) / 100
+	rating = strconv.FormatFloat(rating_float, 'E', -1, 64)
+	rating = strings.ReplaceAll(rating, "E+00", "")
 
-	// bookResponse, _ := json.Marshal()
-	return c.String(http.StatusOK, "Open Library URL ID: "+open_library_id)
+	year, _ := jsonparser.GetString(b, "docs", "[0]", "first_publish_year")
+	author, _ := jsonparser.GetString(b, "docs", "[0]", "author_name")
+
+	bookResponse := &BookResponse{
+		title,
+		author,
+		rating,
+		plot,
+		year,
+	}
+	bookResponseData, _ := json.Marshal(bookResponse)
+	return c.String(http.StatusOK, string(bookResponseData))
+	// 	return c.String(http.StatusOK, "Test")
 }
 
 // getRecommendation(c echo.Context)error{
-
 // }
