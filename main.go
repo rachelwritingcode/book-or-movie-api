@@ -19,6 +19,11 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
+type Error struct {
+	Code    string `json:code`
+	Message string `json:message`
+}
+
 type BookResponse struct {
 	Title  string `json:title`
 	Author string `json:author`
@@ -46,7 +51,9 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	// Routes
+	// TODO Return the string results of /getmovie /getbook routes
+	// Return the string to the page here instead of in the handler function
+	// Use the two routes to get recommendations
 	e.GET("/getmovie", getMovie)
 	e.GET("/getbook", getBook)
 	// e.GET("/recommend", getRecommendation)
@@ -127,16 +134,26 @@ func getMovie(c echo.Context) error {
 
 }
 
+// Add %20 to the request url
+func cleanTitleQuery(title string) string {
+	query_parameter := ""
+	title_slice := strings.Split(title, " ")
+	fmt.Println(title_slice)
+
+	for _, s := range title_slice {
+		fmt.Println(s)
+		query_parameter += s + "%20"
+		fmt.Println("Query Parameter " + query_parameter)
+	}
+
+	return query_parameter
+}
+
 func getBook(c echo.Context) error {
-	// TODO Call the Book Review API
-	// Pass in the title request query parameter
-	// Title Request Parameter
-	title := c.QueryParam("title")
-	fmt.Println("Title Query: " + title)
-	//TODO if title has two words, then add the ASCII %20 symbol
-	//https://openlibrary.org/search.json?title=the%20red%20scrolls%20of%20magic
+
+	originalTitle := c.QueryParam("title")
+	title := cleanTitleQuery(originalTitle)
 	request_url := "http://openlibrary.org/search.json?title=" + title
-	fmt.Println("Request URL: " + request_url)
 
 	req, err := http.NewRequest("GET", request_url, nil)
 	if err != nil {
@@ -157,12 +174,19 @@ func getBook(c echo.Context) error {
 		log.Fatalln(err)
 	}
 
-	fmt.Println(string(b))
+	if strings.Contains(string(b), "400 Bad request") {
+
+		errorResponse := &Error{
+			"400",
+			"Unable to find this title",
+		}
+		errorResp, _ := json.Marshal(errorResponse)
+		return c.String(http.StatusBadRequest, string(errorResp))
+	}
 
 	open_library_id, _ := jsonparser.GetString(b, "docs", "[0]", "key")
-	fmt.Println("open_library_id : " + open_library_id)
 
-	// Scrape Open Library for rating and plot information
+	// Web Scrape Open Library for rating and plot information
 	rating := ""
 	var plot string = ""
 	var ratings = []string{}
@@ -199,19 +223,24 @@ func getBook(c echo.Context) error {
 	rating = strconv.FormatFloat(rating_float, 'E', -1, 64)
 	rating = strings.ReplaceAll(rating, "E+00", "")
 
-	year, _ := jsonparser.GetString(b, "docs", "[0]", "first_publish_year")
+	data_title, _ := jsonparser.GetString(b, "docs", "[0]", "title")
+	yearInt, _ := jsonparser.GetInt(b, "docs", "[0]", "first_publish_year")
+	yearString := strconv.FormatInt(int64(yearInt), 10)
+
 	author, _ := jsonparser.GetString(b, "docs", "[0]", "author_name")
+	plot = strings.ReplaceAll(plot, "\n", "")
+	plot = strings.Trim(plot, " ")
+	plot = strings.ReplaceAll(plot, "\\", "")
 
 	bookResponse := &BookResponse{
-		title,
+		data_title,
 		author,
 		rating,
 		plot,
-		year,
+		yearString,
 	}
 	bookResponseData, _ := json.Marshal(bookResponse)
 	return c.String(http.StatusOK, string(bookResponseData))
-	// 	return c.String(http.StatusOK, "Test")
 }
 
 // getRecommendation(c echo.Context)error{
