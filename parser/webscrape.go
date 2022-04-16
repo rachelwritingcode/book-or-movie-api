@@ -9,8 +9,8 @@ import (
 	"github.com/gocolly/colly"
 )
 
-const openLibraryAPI = "http://openlibrary.org/search.json?title="
-const openLibraryURL = "http://openlibrary.org"
+const URL = "http://openlibrary.org"
+const domain = "openlibrary.org"
 
 func WebScrape(open_library_id string) (string, string) {
 
@@ -19,7 +19,7 @@ func WebScrape(open_library_id string) (string, string) {
 	var ratings = []string{}
 
 	web_scraper := colly.NewCollector(
-		colly.AllowedDomains(openLibraryURL, "openlibrary.org"),
+		colly.AllowedDomains(URL, domain),
 	)
 
 	web_scraper.OnHTML(".readers-stats ", func(e *colly.HTMLElement) {
@@ -42,7 +42,7 @@ func WebScrape(open_library_id string) (string, string) {
 	web_scraper.OnRequest(func(request *colly.Request) {
 	})
 
-	web_scraper.Visit(openLibraryURL + open_library_id)
+	web_scraper.Visit(URL + open_library_id)
 
 	Rating = strings.ReplaceAll(ratings[len(ratings)-1], "★", "")
 	rating_float, _ := strconv.ParseFloat(Rating, 64)
