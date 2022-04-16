@@ -19,12 +19,11 @@ func GetBook(c echo.Context) error {
 	return c.String(http.StatusOK, GetBookData(title))
 }
 
-func GetReccomend(c echo.Context) error {
+func GetReccomendation(c echo.Context) error {
 
 	title := cleanTitleParameter(c.QueryParam("title"))
 	recommendation := CompareBookAndMovieData(GetMovieData(title), GetBookData(title), title)
 	status, _ := jsonparser.GetString([]byte(recommendation), "Message")
-
 	if strings.Contains(status, models.NoBookOrMovieFound) {
 		return c.String(http.StatusNotFound, recommendation)
 	}

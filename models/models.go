@@ -7,8 +7,8 @@ type Error struct {
 }
 
 type Recommendation struct {
-	Title          string `json:title`
 	Recommendation string `json:recommendation`
+	Title          string `json:title`
 	BookRating     string `json:bookrating`
 	MovieRating    string `json:movierating`
 	MoviePlot      string `json:movieplot`

@@ -15,7 +15,7 @@ func Server() {
 
 	e.GET("/getmovie", handlers.GetMovie)
 	e.GET("/getbook", handlers.GetBook)
-	e.GET("/recommend", handlers.GetReccomend)
+	e.GET("/getrecommendation", handlers.GetReccomendation)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

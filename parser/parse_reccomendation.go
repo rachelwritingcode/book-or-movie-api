@@ -33,6 +33,8 @@ func ParseReccomendation(bookData string, movieData string) string {
 		recommend.Recommendation = models.BookFirst
 	} else if math.Max(bookRatingFloat, movieRatingFloat) == movieRatingFloat {
 		recommend.Recommendation = models.MovieFirst
+	} else if recommend.BookRating == "" && recommend.MovieRating == "" {
+		recommend.Recommendation = models.NoBookNoMovieRating
 	} else {
 		recommend.Recommendation = models.BothFirst
 	}
