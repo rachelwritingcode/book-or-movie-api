@@ -11,24 +11,18 @@ import (
 )
 
 func GetMovie(c echo.Context) error {
-	movieData := GetMovieData(c.QueryParam("title"))
-	return c.String(http.StatusOK, movieData)
+	return c.String(http.StatusOK, GetMovieData(c.QueryParam("title")))
 }
 
 func GetBook(c echo.Context) error {
 	var title string = cleanTitleParameter(c.QueryParam("title"))
-	bookData := GetBookData(title)
-	return c.String(http.StatusOK, bookData)
+	return c.String(http.StatusOK, GetBookData(title))
 }
 
 func GetReccomend(c echo.Context) error {
 
 	title := cleanTitleParameter(c.QueryParam("title"))
-
-	bookData := GetBookData(title)
-	movieData := GetMovieData(title)
-
-	recommendation := CompareBookAndMovieData(movieData, bookData, title)
+	recommendation := CompareBookAndMovieData(GetMovieData(title), GetBookData(title), title)
 	status, _ := jsonparser.GetString([]byte(recommendation), "Message")
 
 	if strings.Contains(status, models.NoBookOrMovieFound) {

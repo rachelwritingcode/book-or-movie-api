@@ -55,7 +55,7 @@ func CompareBookAndMovieData(movieData string, bookData string, title string) st
 		recommend.MovieAwards = movieAwards
 
 	} else { // Both book and movie data is retrieved
-		parser.ParseReccomendation(bookData, movieData)
+		return parser.ParseReccomendation(bookData, movieData)
 	}
 
 	recommendationData, _ := json.Marshal(recommend)

@@ -10,10 +10,10 @@ import (
 	"github.com/buger/jsonparser"
 )
 
-//TODO fix bug
 func ParseReccomendation(bookData string, movieData string) string {
 
 	var recommend = new(models.Recommendation)
+
 	titleString, _ := jsonparser.GetString([]byte(bookData), "Title")
 	recommend.Title = titleString
 	authorString, _ := jsonparser.GetString([]byte(bookData), "Author")
@@ -51,7 +51,6 @@ func ParseReccomendation(bookData string, movieData string) string {
 		recommend.Recommendation = models.BothFirst
 	}
 	recommendationData, _ := json.Marshal(recommend)
-
 	reccommendResponse := string(recommendationData)
 	return reccommendResponse
 
