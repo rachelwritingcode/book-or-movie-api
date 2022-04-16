@@ -13,35 +13,21 @@ import (
 func ParseReccomendation(bookData string, movieData string) string {
 
 	var recommend = new(models.Recommendation)
+	recommend.Title, _ = jsonparser.GetString([]byte(bookData), "Title")
+	recommend.Author, _ = jsonparser.GetString([]byte(bookData), "Author")
+	recommend.BookRating, _ = jsonparser.GetString([]byte(bookData), "Rating")
+	recommend.BookPlot, _ = jsonparser.GetString([]byte(bookData), "Plot")
+	recommend.BookPublished, _ = jsonparser.GetString([]byte(bookData), "Year")
 
-	titleString, _ := jsonparser.GetString([]byte(bookData), "Title")
-	recommend.Title = titleString
-	authorString, _ := jsonparser.GetString([]byte(bookData), "Author")
-	recommend.Author = authorString
-	bookRatingString, _ := jsonparser.GetString([]byte(bookData), "Rating")
-	recommend.BookRating = bookRatingString
-	bookPlotString, _ := jsonparser.GetString([]byte(bookData), "Plot")
-	recommend.BookPlot = bookPlotString
-	publishingYear, _ := jsonparser.GetString([]byte(bookData), "Year")
-	recommend.BookPublished = publishingYear
+	recommend.MovieRating, _ = jsonparser.GetString([]byte(movieData), "Rating")
+	recommend.Actors, _ = jsonparser.GetString([]byte(movieData), "Actors")
+	recommend.Director, _ = jsonparser.GetString([]byte(movieData), "Director")
+	recommend.MoviePlot, _ = jsonparser.GetString([]byte(movieData), "Plot")
+	recommend.MovieReleased, _ = jsonparser.GetString([]byte(movieData), "ReleaseYear")
+	recommend.MovieAwards, _ = jsonparser.GetString([]byte(movieData), "Awards")
 
-	// Movie Data
-	movieRatingString, _ := jsonparser.GetString([]byte(movieData), "Rating")
-	recommend.MovieRating = movieRatingString
-	actors, _ := jsonparser.GetString([]byte(movieData), "Actors")
-	recommend.Actors = actors
-	director, _ := jsonparser.GetString([]byte(movieData), "Director")
-	recommend.Director = director
-	moviePlotString, _ := jsonparser.GetString([]byte(movieData), "Plot")
-	recommend.MoviePlot = moviePlotString
-	movieYear, _ := jsonparser.GetString([]byte(movieData), "ReleaseYear")
-	recommend.MovieReleased = movieYear
-	movieAwards, _ := jsonparser.GetString([]byte(movieData), "Awards")
-	recommend.MovieAwards = movieAwards
-
-	// Compare Movie and Book Ratings
-	bookRatingFloat, _ := strconv.ParseFloat(bookRatingString, 64)
-	movieRatingFloat, _ := strconv.ParseFloat(movieRatingString, 64)
+	bookRatingFloat, _ := strconv.ParseFloat(recommend.BookRating, 64)
+	movieRatingFloat, _ := strconv.ParseFloat(recommend.MovieRating, 64)
 
 	if math.Max(bookRatingFloat, movieRatingFloat) == bookRatingFloat {
 		recommend.Recommendation = models.BookFirst

@@ -11,21 +11,14 @@ import (
 func ParseMovie(response []byte, title string) string {
 
 	movieResponseData := new(models.MovieResponse)
-	director, _ := jsonparser.GetString(response, "Director")
-	plot, _ := jsonparser.GetString(response, "Plot")
-	actors, _ := jsonparser.GetString(response, "Actors")
-	rating, _ := jsonparser.GetString(response, "imdresponseRating")
-	year, _ := jsonparser.GetString(response, "Year")
-	awards, _ := jsonparser.GetString(response, "Awards")
-	awards = strings.ReplaceAll(awards, "\u0026", "")
-
 	movieResponseData.Title = title
-	movieResponseData.Director = director
-	movieResponseData.Plot = plot
-	movieResponseData.Actors = actors
-	movieResponseData.Rating = rating
-	movieResponseData.ReleaseYear = year
-	movieResponseData.Awards = awards
+	movieResponseData.Director, _ = jsonparser.GetString(response, "Director")
+	movieResponseData.Plot, _ = jsonparser.GetString(response, "Plot")
+	movieResponseData.Actors, _ = jsonparser.GetString(response, "Actors")
+	movieResponseData.Rating, _ = jsonparser.GetString(response, "imdresponseRating")
+	movieResponseData.ReleaseYear, _ = jsonparser.GetString(response, "Year")
+	movieResponseData.Awards, _ = jsonparser.GetString(response, "Awards")
+	movieResponseData.Awards = strings.ReplaceAll(movieResponseData.Awards, "\u0026", "")
 
 	movieData, _ := json.Marshal(movieResponseData)
 	movie := string(movieData)
