@@ -24,6 +24,7 @@ func TestGetBook(t *testing.T) {
 	res := rec.Result()
 	defer res.Body.Close()
 
+	//TODO add more assertions
 	if assert.NoError(t, handlers.GetBook(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 	}
@@ -42,6 +43,7 @@ func TestGetMovie(t *testing.T) {
 	res := rec.Result()
 	defer res.Body.Close()
 
+	//TODO add more assertions
 	if assert.NoError(t, handlers.GetMovie(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 	}
@@ -60,6 +62,7 @@ func TestGetReccomendation(t *testing.T) {
 	res := rec.Result()
 	defer res.Body.Close()
 
+	//TODO add more assertions
 	if assert.NoError(t, handlers.GetReccomendation(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 	}

@@ -8,7 +8,7 @@
 Learn more about the following:
 - Creating APIs with the golang echo web framework `[DONE]`
 - Webscraping with golang colly web scraping framework `[DONE]`
-- Testing with golang testify `[DONE]`
+- Testing with golang testify `[HALF DONE]`
 - Deploying with serverless computing, AWS Lambda `[TODO]`
 
 ---
