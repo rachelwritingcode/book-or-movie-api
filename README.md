@@ -98,5 +98,7 @@ __Coming soon...__
 
 ---
 ## How to run tests?
+In the root directory of the repo type the following:
 
-__Coming soon...__
+`go test`
+
