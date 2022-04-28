@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"math"
-	"strconv"
 	"strings"
 	"time"
 
@@ -40,10 +38,11 @@ func WebScrape(open_library_id string) (string, string) {
 	web_scraper.Visit(URL + open_library_id)
 
 	Rating = strings.ReplaceAll(ratings[len(ratings)-1], "★", "")
-	rating_float, _ := strconv.ParseFloat(Rating, 64)
-	rating_float = (math.Ceil(rating_float*100) / 100) / 5 * 10
-	Rating = strconv.FormatFloat(rating_float, 'E', -1, 64)
-	Rating = strings.ReplaceAll(Rating, "E+00", "")
+	ratingStr := strings.Split(Rating, ".")
+	first_digits := ratingStr[0]
+	end_digits := strings.Split(ratingStr[1], "")
+	ending_decimals := end_digits[0] + end_digits[1]
+	Rating = first_digits + "." + ending_decimals
 
 	Plot = strings.ReplaceAll(Plot, "\n", "")
 	Plot = strings.Trim(Plot, " ")
