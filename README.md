@@ -91,7 +91,7 @@ In the root directory of the repo type the following:
 
 ---
 
-## How to run this in AWS lambda?
+## How to deploy this in AWS lambda?
 
 __Coming soon...__
 
