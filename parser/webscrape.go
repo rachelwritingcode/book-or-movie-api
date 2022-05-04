@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -37,16 +39,28 @@ func WebScrape(open_library_id string) (string, string) {
 	})
 	web_scraper.Visit(URL + open_library_id)
 
-	Rating = strings.ReplaceAll(ratings[len(ratings)-1], "★", "")
-	ratingStr := strings.Split(Rating, ".")
-	first_digits := ratingStr[0]
-	end_digits := strings.Split(ratingStr[1], "")
-	ending_decimals := end_digits[0] + end_digits[1]
-	Rating = first_digits + "." + ending_decimals
+	Rating = CleanRating(ratings)
 
 	Plot = strings.ReplaceAll(Plot, "\n", "")
 	Plot = strings.Trim(Plot, " ")
 	Plot = strings.ReplaceAll(Plot, "\\", "")
 
 	return Rating, Plot
+}
+
+func CleanRating(ratings []string) string {
+
+	// Clean up the star symbols
+	Rating := strings.ReplaceAll(ratings[len(ratings)-1], "★", "")
+	ratingStr := strings.Split(Rating, ".")
+	first_digits := ratingStr[0]
+	end_digits := strings.Split(ratingStr[1], "")
+	ending_decimals := end_digits[0] + end_digits[1]
+	Rating = first_digits + "." + ending_decimals
+
+	// Convert the open library rating to a percent to match OMDB rating
+	ratingFloat, _ := strconv.ParseFloat(Rating, 64)
+	ratingFloat = ratingFloat * 2
+	Rating = fmt.Sprintf("%.2f", ratingFloat)
+	return Rating
 }
